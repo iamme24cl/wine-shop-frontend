@@ -7,7 +7,6 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: "",
       email: "",
       password: ""
     }
@@ -16,7 +15,12 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    axios.get('http://localhost:3000/login_status')
+    let token = localStorage.getItem("token");
+    axios.get('http://localhost:3000/login_status', {
+      headers: {
+        "Authorization": token
+      },
+    })
       .then(res => console.log(res.data));
   }
 
@@ -28,38 +32,33 @@ class App extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    axios.post('http://localhost:3000/users', {
-      user: {
-        name: this.state.name,
+    axios.post('http://localhost:3000/sessions', {
+      session : {
         email: this.state.email,
         password: this.state.password
       }
     })
-    .then(res => console.log(res))
+    .then(res => {
+      console.log(res.data);
+      localStorage.setItem("token", res.data.user.token)
+    })
     .catch(err => console.log(err))
 
     this.setState({
-      name: "",
       email: "",
       password: ""
     })
   }
 
-
-
   render () {
     return (
       <div className="container mt-5">
         <form onSubmit={this.handleSubmit}>
-          <div className="form-group">
-            <label>Name</label>
-            <input type="text" placeholder="Name" value={this.state.name} name="name" onChange={this.handleChange} className="form-control"/>
-          </div>
-          <div className="form-group">
+          <div className="form-group mb-3">
             <label>Email</label>
             <input type="text" placeholder="example@mail.com" value={this.state.email} name="email" onChange={this.handleChange} className="form-control"/>
           </div>
-          <div className="form-group">
+          <div className="form-group mb-3">
             <label>Password</label>
             <input type="password" placeholder="password" value={this.state.password} name="password" onChange={this.handleChange} className="form-control"/>
           </div>
